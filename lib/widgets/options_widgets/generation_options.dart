@@ -11,12 +11,16 @@ class GenerationOptions extends ConsumerStatefulWidget {
     required this.allHobbies,
     required this.onTopicChanged,
     required this.onHobbyChanged,
+    required this.topicController,
+    required this.hobbyController,
   });
   final ColorScheme colorScheme;
   final List<String> userTopics;
   final List<String> allHobbies;
   final Function(String) onTopicChanged;
   final Function(String) onHobbyChanged;
+  final TextEditingController topicController;
+  final TextEditingController hobbyController;
   @override
   ConsumerState<GenerationOptions> createState() =>
       _GenerationOptionsState();
@@ -148,19 +152,20 @@ class _GenerationOptionsState
           ],
         ),
         InputWithAutocomplete(
-          key: ValueKey(
-            'topic-$_selectedClass-$_selectedDiscipline',
-          ),
+          key: ValueKey('topic_field'),
           inputText: 'Тема',
           autocomleteItemsList: _allTopics,
           onSelectedParam: widget.onTopicChanged,
           inputColor: widget.colorScheme.onTertiary,
+          controller: widget.topicController,
         ),
         InputWithAutocomplete(
+          key: ValueKey('hobby_field'),
           inputText: 'Гоббі/Інтерес',
           autocomleteItemsList: widget.allHobbies,
           onSelectedParam: widget.onHobbyChanged,
           inputColor: widget.colorScheme.onTertiary,
+          controller: widget.hobbyController,
         ),
       ],
     );

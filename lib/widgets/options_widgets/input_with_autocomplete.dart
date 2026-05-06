@@ -7,11 +7,13 @@ class InputWithAutocomplete extends StatelessWidget {
     required this.autocomleteItemsList,
     required this.onSelectedParam,
     required this.inputColor,
+    this.controller,
   });
   final String inputText;
   final List<String> autocomleteItemsList;
   final Function(String) onSelectedParam;
   final Color inputColor;
+  final TextEditingController? controller;
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
@@ -32,6 +34,14 @@ class InputWithAutocomplete extends StatelessWidget {
             focusNode,
             onFieldSubmitted,
           ) {
+            if (controller != null &&
+                controller!.text != textEditingController.text) {
+              if (controller!.text.isEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  textEditingController.clear();
+                });
+              }
+            }
             return TextFormField(
               controller: textEditingController,
               focusNode: focusNode,
@@ -43,7 +53,7 @@ class InputWithAutocomplete extends StatelessWidget {
               validator: (value) {
                 if (value == null ||
                     value == '' ||
-                    value.length < 3) {
+                    value.length < 4) {
                   return '$inputText має бути довше 3х символів';
                 }
                 return null;

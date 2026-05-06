@@ -16,7 +16,7 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Ми використовуємо штучний інтелект (Groq/Llama), щоб створювати '
+            'Ми використовуємо штучний інтелект (Gemini), щоб створювати '
             'математичні задачі на основі ваших інтересів.',
           ),
           const SizedBox(height: 12),

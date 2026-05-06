@@ -16,10 +16,13 @@ class UserDataProvider
           return {
             'id': item['id'] as String,
             'title': item['title'] as String,
-            'createdAt': DateTime.now().toIso8601String(),
+            'createdAt': item['createdAt'] as String,
           };
         },
       ).toList();
+      loadedData.sort(
+        (a, b) => b['createdAt']!.compareTo(a['createdAt']!),
+      );
       state = loadedData;
     }
   }
@@ -41,11 +44,16 @@ class UserDataProvider
     final existingItem = state.firstWhere(
       (item) => item['id'] == id,
     );
-    _db.collection(dbTitle).doc(id).set({
+    final updatedItem = {
       'id': id,
       'title': newTitle,
       'createdAt': existingItem['createdAt']!,
-    });
+    };
+    _db.collection(dbTitle).doc(id).set(updatedItem);
+    state = [
+      for (final item in state)
+        if (item['id'] == id) updatedItem else item,
+    ];
   }
 
   void deleteItem(String id) {

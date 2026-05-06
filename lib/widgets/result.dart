@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:skill_up_app/Providers/groq_provider.dart';
+import 'package:skill_up_app/Providers/gemini_provider.dart';
+import 'package:skill_up_app/widgets/math_text_adapt.dart';
 
 class Result extends ConsumerWidget {
   const Result({super.key});
@@ -8,28 +10,42 @@ class Result extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final response = ref.watch(groqResponseProvider);
-    
-    // Визначаємо контент залежно від стану
+
     Widget content;
 
     if (response == 'loading') {
-      content = const Center(
+      content = Center(
         child: CircularProgressIndicator(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
       );
     } else if (response.isEmpty) {
-      content = const Text(
+      content = Text(
         'Ще не має задачі, згенеруйте нову!',
         textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
       );
     } else {
       content = SingleChildScrollView(
-        child: Text(
-          response,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary,
+        child: MarkdownBody(
+          data: response,
+          inlineSyntaxes: [LatexSyntax()],
+          builders: {
+            'latex': LatexBuilder(
+              textStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight(700),
+              ),
+            ),
+          },
+          styleSheet: MarkdownStyleSheet(
+            p: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            pPadding: EdgeInsets.zero,
+            blockSpacing: 8,
           ),
         ),
       );
@@ -45,13 +61,13 @@ class Result extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: content, // Вставляємо підготовлений контент
+      child: content,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:skill_up_app/Providers/groq_provider.dart';
+import 'package:skill_up_app/Providers/gemini_provider.dart';
 import 'package:skill_up_app/Providers/user_data_provider.dart';
 import 'package:skill_up_app/data/base_data.dart';
 import 'package:skill_up_app/widgets/options_widgets/adaptation_options.dart';
@@ -18,13 +18,17 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
   final _formKey = GlobalKey<FormState>();
   var _selectedTopic = '';
   var _selectedHobby = '';
+  final TextEditingController _topicController =
+      TextEditingController();
+  final TextEditingController _hobbyController =
+      TextEditingController();
   bool isSending = false;
   void _sendPrompt() async {
     setState(() {
       isSending = true;
     });
 
-    FocusScope.of(context).unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
     final isValid = _formKey.currentState!.validate();
     if (!isValid) {
       setState(() {
@@ -33,19 +37,23 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
 
       return;
     }
-    _formKey.currentState!.save();
 
+    _formKey.currentState!.save();
     await ref
         .read(groqResponseProvider.notifier)
         .generateProblem(_selectedTopic, _selectedHobby);
     final task = ref.read(groqResponseProvider);
-    if (!task.startsWith('Помилка:') && task != 'loading') {
+    if (!task.startsWith('Помилка') && task != 'loading') {
       ref.read(userDataProvider('tasks').notifier).addItem(task);
       _addUserParams();
-      _selectedTopic = '';
-      _selectedHobby = '';
+      setState(() {
+        _topicController.clear();
+        _hobbyController.clear();
+        _selectedTopic = '';
+        _selectedHobby = '';
+        isSending = false;
+      });
     }
-
     setState(() {
       isSending = false;
     });
@@ -125,6 +133,8 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
                 children: [
                   _groupValue == 0
                       ? GenerationOptions(
+                          topicController: _topicController,
+                          hobbyController: _hobbyController,
                           colorScheme: colorScheme,
                           userTopics: userTopics,
                           allHobbies: allHobbies,
@@ -145,7 +155,7 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
                       ElevatedButton(
                         onPressed: isSending ? () {} : _sendPrompt,
                         child: isSending
-                            ? CircularProgressIndicator()
+                            ? Text('Зачекайте...')
                             : Text('Надіслати'),
                       ),
                     ],
