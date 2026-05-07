@@ -7,11 +7,20 @@ import 'package:http/http.dart' as http;
 class GroqProvider extends StateNotifier<String> {
   GroqProvider() : super('');
 
-  Future<void> generateProblem(String topic, String hobby) async {
-    final prompt =
-        'Перевір наступні параметри: Тема: $topic; Інтерес/Гоббі:$hobby ;'
+  Future<void> generateProblem({
+    String? topic,
+    String? image,
+    required String hobby,
+  }) async {
+    final generationP =
+        'Перевір наступні параметри: Тема: $topic Інтерес/Гоббі:$hobby ;'
         'Якщо параметри не відповідають своїм назвам,в кінцевій відповіді поверни ЛИШЕ наступний текст:"Помилка:Задана Тема чи Гоббі є некоректними";'
         'Інакше згенеруй унікальну задачу УКРАЇНСЬКОЮ мовою, без слів інших мов, на вказану тему, адаптовану під гоббі, та поверни ЛИШЕ текст умови.';
+    final adaptationP =
+        'Перевір наступні параметри: Умова: Умва задачі на зображенні, Інтерес/Гоббі:$hobby ;'
+        'Якщо параметри не відповідають своїм назвам,в кінцевій відповіді поверни ЛИШЕ наступний текст:"Помилка:Задана умова чи Гоббі є некоректними";'
+        'Інакше адаптуй умову задачі УКРАЇНСЬКОЮ мовою, без слів інших мов, під гоббі, та поверни ЛИШЕ текст умови.';
+    final prompt = image != null ? adaptationP : generationP;
     state = 'loading';
     try {
       final apiKey = dotenv.get('GEMINI_API_KEY');
@@ -22,6 +31,13 @@ class GroqProvider extends StateNotifier<String> {
           {
             "parts": [
               {"text": prompt},
+              if (image != null && image != 'no-img')
+                {
+                  "inline_data": {
+                    "mime_type": "image/jpeg",
+                    "data": image,
+                  },
+                },
             ],
           },
         ],

@@ -20,6 +20,27 @@ class AboutScreen extends StatelessWidget {
             'математичні задачі на основі ваших інтересів.',
           ),
           const SizedBox(height: 12),
+          const Text(
+            'Генерація',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            'Оберіть тему та гобі (або введіть свої), та надішліть запит. '
+            'Зачекайте доки в полі не з\'явиться умова задачі.',
+          ),
+          const Text(
+            'Адаптація',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Text(
+            'Оберіть гобі (або введіть своє),зробіть фотографію задачі та надішліть запит. '
+            'Зачекайте доки в полі не з\'явиться перероблена умова задачі.',
+          ),
+          const Text(
+            'Враховуйте, що тема та гобі задач мають бути коректними, інакше ШІ напише про помилку. ',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+          const SizedBox(height: 12),
           Text(
             'Версія: 1.0.4',
             style: TextStyle(

@@ -41,3 +41,6 @@ GEMINI_API_KEY=*Your_Api_key*
 ```
 flutter run
 ```
+
+![alt text](image-1.png)
+![alt text](image-2.png)

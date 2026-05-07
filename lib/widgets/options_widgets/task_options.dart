@@ -6,6 +6,9 @@ import 'package:skill_up_app/Providers/user_data_provider.dart';
 import 'package:skill_up_app/data/base_data.dart';
 import 'package:skill_up_app/widgets/options_widgets/adaptation_options.dart';
 import 'package:skill_up_app/widgets/options_widgets/generation_options.dart';
+import 'dart:io';
+import 'dart:convert';
+// import 'package:flutter/services.dart'; //? to test on assets images
 
 class TaskOptions extends ConsumerStatefulWidget {
   const TaskOptions({super.key});
@@ -18,6 +21,7 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
   final _formKey = GlobalKey<FormState>();
   var _selectedTopic = '';
   var _selectedHobby = '';
+  File? _selectedImage;
   final TextEditingController _topicController =
       TextEditingController();
   final TextEditingController _hobbyController =
@@ -39,9 +43,27 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
     }
 
     _formKey.currentState!.save();
+    String? base64Image;
+    //? to test on assets images
+    // ByteData bytes = await rootBundle.load('assets/images/ex1.jpg');
+    // var buffer = bytes.buffer;
+    // var unit8List = buffer.asUint8List(
+    //   bytes.offsetInBytes,
+    //   bytes.lengthInBytes,
+    // );
+    // var testImg = base64.encode(unit8List);
+    //?-------------------------------
+    if (_selectedImage != null) {
+      final bytes = await _selectedImage!.readAsBytes();
+      base64Image = base64Encode(bytes);
+    }
     await ref
         .read(groqResponseProvider.notifier)
-        .generateProblem(_selectedTopic, _selectedHobby);
+        .generateProblem(
+          topic: _selectedTopic,
+          hobby: _selectedHobby,
+          image: base64Image,
+        );
     final task = ref.read(groqResponseProvider);
     if (!task.startsWith('Помилка') && task != 'loading') {
       ref.read(userDataProvider('tasks').notifier).addItem(task);
@@ -145,7 +167,16 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
                             _selectedHobby = value;
                           },
                         )
-                      : AdaptationOptions(colorScheme: colorScheme),
+                      : AdaptationOptions(
+                          colorScheme: colorScheme,
+                          hobbyController: _hobbyController,
+                          onImageChanged: (value) {
+                            _selectedImage = value;
+                          },
+                          onHobbyChanged: (value) {
+                            _selectedHobby = value;
+                          },
+                        ),
 
                   SizedBox(height: 24),
                   Row(
