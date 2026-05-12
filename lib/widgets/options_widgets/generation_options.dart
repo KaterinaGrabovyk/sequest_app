@@ -11,16 +11,12 @@ class GenerationOptions extends ConsumerStatefulWidget {
     required this.allHobbies,
     required this.onTopicChanged,
     required this.onHobbyChanged,
-    required this.topicController,
-    required this.hobbyController,
   });
   final ColorScheme colorScheme;
   final List<String> userTopics;
   final List<String> allHobbies;
   final Function(String) onTopicChanged;
   final Function(String) onHobbyChanged;
-  final TextEditingController topicController;
-  final TextEditingController hobbyController;
   @override
   ConsumerState<GenerationOptions> createState() =>
       _GenerationOptionsState();
@@ -48,36 +44,36 @@ class _GenerationOptionsState
   }
 
   List<String> get _allTopics {
+    if (_selectedDiscipline != '' && _selectedClass != 0) {
+      return schoolProgram
+          .firstWhere((c) => c.clasNumber == _selectedClass)
+          .disciplines
+          .firstWhere((d) => d.title == _selectedDiscipline)
+          .topics
+          .map((t) => t.title)
+          .toList();
+    }
+    if (_selectedClass != 0) {
+      return schoolProgram
+          .firstWhere((c) => c.clasNumber == _selectedClass)
+          .disciplines
+          .expand((d) => d.topics)
+          .map((t) => t.title)
+          .toList();
+    }
     if (_selectedDiscipline != '') {
-      if (_selectedClass != 0) {
-        return schoolProgram
-            .firstWhere(
-              (schoolClass) =>
-                  schoolClass.clasNumber == _selectedClass,
-            )
-            .disciplines
-            .firstWhere(
-              (schoolDisc) =>
-                  schoolDisc.title == _selectedDiscipline,
-            )
-            .topics
-            .map((topic) => topic.title)
-            .toList();
-      }
       return schoolProgram
           .expand((c) => c.disciplines)
-          .where(
-            (schoolDisc) => schoolDisc.title == _selectedDiscipline,
-          )
+          .where((d) => d.title == _selectedDiscipline)
           .expand((d) => d.topics)
-          .map((topic) => topic.title)
+          .map((t) => t.title)
           .toList();
     }
     return [
       ...schoolProgram
           .expand((c) => c.disciplines)
           .expand((d) => d.topics)
-          .map((topic) => topic.title),
+          .map((t) => t.title),
       ...widget.userTopics,
     ];
   }
@@ -152,12 +148,13 @@ class _GenerationOptionsState
           ],
         ),
         InputWithAutocomplete(
-          key: ValueKey('topic_field'),
+          key: ValueKey(
+            'topic_field-$_selectedClass-$_selectedDiscipline',
+          ),
           inputText: 'Тема',
           autocomleteItemsList: _allTopics,
           onSelectedParam: widget.onTopicChanged,
           inputColor: widget.colorScheme.onTertiary,
-          controller: widget.topicController,
         ),
         InputWithAutocomplete(
           key: ValueKey('hobby_field'),
@@ -165,7 +162,6 @@ class _GenerationOptionsState
           autocomleteItemsList: widget.allHobbies,
           onSelectedParam: widget.onHobbyChanged,
           inputColor: widget.colorScheme.onTertiary,
-          controller: widget.hobbyController,
         ),
       ],
     );

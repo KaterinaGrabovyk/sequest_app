@@ -7,13 +7,11 @@ class InputWithAutocomplete extends StatelessWidget {
     required this.autocomleteItemsList,
     required this.onSelectedParam,
     required this.inputColor,
-    this.controller,
   });
   final String inputText;
   final List<String> autocomleteItemsList;
   final Function(String) onSelectedParam;
   final Color inputColor;
-  final TextEditingController? controller;
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
@@ -27,6 +25,32 @@ class InputWithAutocomplete extends StatelessWidget {
           );
         });
       },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 32,
+              height: inputText == 'Тема' ? 120 : 80,
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final String option = options.elementAt(index);
+                  return ListTile(
+                    title: Text(option),
+                    onTap: () => onSelected(option),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+
       fieldViewBuilder:
           (
             context,
@@ -34,14 +58,6 @@ class InputWithAutocomplete extends StatelessWidget {
             focusNode,
             onFieldSubmitted,
           ) {
-            if (controller != null &&
-                controller!.text != textEditingController.text) {
-              if (controller!.text.isEmpty) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  textEditingController.clear();
-                });
-              }
-            }
             return TextFormField(
               controller: textEditingController,
               focusNode: focusNode,

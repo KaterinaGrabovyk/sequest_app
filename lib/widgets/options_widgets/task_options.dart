@@ -22,10 +22,6 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
   var _selectedTopic = '';
   var _selectedHobby = '';
   File? _selectedImage;
-  final TextEditingController _topicController =
-      TextEditingController();
-  final TextEditingController _hobbyController =
-      TextEditingController();
   bool isSending = false;
   void _sendPrompt() async {
     setState(() {
@@ -69,8 +65,6 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
       ref.read(userDataProvider('tasks').notifier).addItem(task);
       _addUserParams();
       setState(() {
-        _topicController.clear();
-        _hobbyController.clear();
         _selectedTopic = '';
         _selectedHobby = '';
         isSending = false;
@@ -155,8 +149,6 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
                 children: [
                   _groupValue == 0
                       ? GenerationOptions(
-                          topicController: _topicController,
-                          hobbyController: _hobbyController,
                           colorScheme: colorScheme,
                           userTopics: userTopics,
                           allHobbies: allHobbies,
@@ -169,7 +161,7 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
                         )
                       : AdaptationOptions(
                           colorScheme: colorScheme,
-                          hobbyController: _hobbyController,
+                          allHobbies: allHobbies,
                           onImageChanged: (value) {
                             _selectedImage = value;
                           },
