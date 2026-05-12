@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +9,6 @@ import 'package:skill_up_app/data/base_data.dart';
 import 'package:skill_up_app/widgets/options_widgets/adaptation_options.dart';
 import 'package:skill_up_app/widgets/options_widgets/generation_options.dart';
 import 'dart:io';
-import 'dart:convert';
 // import 'package:flutter/services.dart'; //? to test on assets images
 
 class TaskOptions extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
     }
 
     _formKey.currentState!.save();
-    String? base64Image;
+    Uint8List? finalImageBytes;
     //? to test on assets images
     // ByteData bytes = await rootBundle.load('assets/images/ex1.jpg');
     // var buffer = bytes.buffer;
@@ -50,17 +51,16 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
     // var testImg = base64.encode(unit8List);
     //?-------------------------------
     if (_selectedImage != null) {
-      final bytes = await _selectedImage!.readAsBytes();
-      base64Image = base64Encode(bytes);
+      finalImageBytes = await _selectedImage!.readAsBytes();
     }
     await ref
-        .read(groqResponseProvider.notifier)
+        .read(aiResponseProvider.notifier)
         .generateProblem(
           topic: _selectedTopic,
           hobby: _selectedHobby,
-          image: base64Image,
+          image: finalImageBytes,
         );
-    final task = ref.read(groqResponseProvider);
+    final task = ref.read(aiResponseProvider);
     if (!task.startsWith('Помилка') && task != 'loading') {
       ref.read(userDataProvider('tasks').notifier).addItem(task);
       _addUserParams();

@@ -9,7 +9,7 @@ class Result extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final response = ref.watch(groqResponseProvider);
+    final response = ref.watch(aiResponseProvider);
 
     Widget content;
 

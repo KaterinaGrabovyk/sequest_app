@@ -1,15 +1,13 @@
-import 'dart:convert';
-
+import 'dart:typed_data';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 
-class GroqProvider extends StateNotifier<String> {
-  GroqProvider() : super('');
+class AIProvider extends StateNotifier<String> {
+  AIProvider() : super('');
 
   Future<void> generateProblem({
     String? topic,
-    String? image,
+    Uint8List? image,
     required String hobby,
   }) async {
     final generationP =
@@ -20,43 +18,25 @@ class GroqProvider extends StateNotifier<String> {
         'Перевір наступні параметри: Умова: Умва задачі на зображенні, Інтерес/Гоббі:$hobby ;'
         'Якщо параметри не відповідають своїм назвам,в кінцевій відповіді поверни ЛИШЕ наступний текст:"Помилка:Задана умова чи Гоббі є некоректними";'
         'Інакше адаптуй умову задачі УКРАЇНСЬКОЮ мовою, без слів інших мов, під гоббі, та поверни ЛИШЕ текст умови.';
-    final prompt = image != null ? adaptationP : generationP;
+    final textPrompt = image != null ? adaptationP : generationP;
+
     state = 'loading';
     try {
-      final apiKey = dotenv.get('GEMINI_API_KEY');
-      final url =
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=$apiKey';
-      final body = {
-        "contents": [
-          {
-            "parts": [
-              {"text": prompt},
-              if (image != null && image != 'no-img')
-                {
-                  "inline_data": {
-                    "mime_type": "image/jpeg",
-                    "data": image,
-                  },
-                },
-            ],
-          },
-        ],
-      };
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(body),
+      final model = FirebaseAI.googleAI().generativeModel(
+        model: 'gemini-3.1-flash-lite',
       );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final String textResponse =
-            data['candidates'][0]['content']['parts'][0]['text'];
-        state = textResponse;
-        print('Успішно');
+      final prompt = [
+        Content.multi([
+          TextPart(textPrompt),
+          if (image != null) InlineDataPart('image/jpeg', image),
+        ]),
+      ];
+      final response = await model.generateContent(prompt);
+      final text = response.text;
+      if (text != null && text.isNotEmpty) {
+        state = text;
       } else {
-        print('Помилка: ${response.statusCode}');
-        state = 'Помилка: ${response.statusCode}';
+        state = 'Помилка: Модель повернула порожню відповідь';
       }
     } catch (error) {
       state = 'Помилка: $error';
@@ -64,7 +44,7 @@ class GroqProvider extends StateNotifier<String> {
   }
 }
 
-final groqResponseProvider =
-    StateNotifierProvider<GroqProvider, String>(
-      (ref) => GroqProvider(),
+final aiResponseProvider =
+    StateNotifierProvider<AIProvider, String>(
+      (ref) => AIProvider(),
     );

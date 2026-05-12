@@ -69,8 +69,8 @@ class InputWithAutocomplete extends StatelessWidget {
               validator: (value) {
                 if (value == null ||
                     value == '' ||
-                    value.length < 4) {
-                  return '$inputText має бути довше 3х символів';
+                    value.length < 3) {
+                  return '$inputText має бути мінімум 3 символів';
                 }
                 return null;
               },

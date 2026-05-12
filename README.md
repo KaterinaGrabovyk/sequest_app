@@ -6,7 +6,7 @@ An app that allows users to generate math problems adapted to their hobbies;
 
 - Flutter (latest version)
 - Android Studio (for emulator) OR real phone
-- Gemini API key (To create Gemini Api key, Sign in here https://aistudio.google.com/app/prompts/new_chat =>Get Api Key=> create Api key)
+- Firebase CLI
 
 ## Installation
 
@@ -22,19 +22,28 @@ git clone https://github.com/KaterinaGrabovyk/SkillUp_app
 cd SkillUp_app
 ```
 
-3. Install all packages
+3. Firebase:
+
+   3.1 Create Firebase Console Project
+
+   3.2 Add Firebase Logic, enable gemini Developer API
+
+4. Install all packages
 
 ```
 flutter pub get
 ```
 
-4. Create `.env` file in root folder and add Api key
+5. Run configur command
 
 ```
-GEMINI_API_KEY=*Your_Api_key*
+flutterfire configure (or flutterfire.bat configure)
 ```
 
-5. Turn on Emulator or connect phone
+select your Firebas Console project;
+select platforms;
+
+5. Turn on Emulator or real device (make sure it`s connected)
 
 6. run app
 
@@ -42,5 +51,8 @@ GEMINI_API_KEY=*Your_Api_key*
 flutter run
 ```
 
-![alt text](image-1.png)
-![alt text](image-2.png)
+<img src="image-1.png" alt="drawing" width="250"/>
+<img src="image.png" alt="drawing" width="250"/>
+<img src="image-2.png" alt="drawing" width="245"/>
+<img src="image-3.png" alt="drawing" width="250"/>
+<img src="image-4.png" alt="drawing" width="250"/>
