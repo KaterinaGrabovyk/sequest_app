@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class LatexBuilder extends MarkdownElementBuilder {
-  final TextStyle textStyle;
 
-  LatexBuilder({required this.textStyle});
+  final TextStyle? textStyle;
+
+  LatexBuilder({this.textStyle});
 
   @override
   Widget visitElementAfter(
@@ -17,7 +18,7 @@ class LatexBuilder extends MarkdownElementBuilder {
 
     return Math.tex(
       text,
-      textStyle: textStyle,
+      textStyle: textStyle ?? preferredStyle, 
       mathStyle: MathStyle.text,
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skill_up_app/Providers/user_data_provider.dart';
+import 'package:skill_up_app/widgets/math_text_adapt.dart';
 
 class DrawerItemDataScreen extends ConsumerWidget {
   const DrawerItemDataScreen({
@@ -24,7 +26,7 @@ class DrawerItemDataScreen extends ConsumerWidget {
       );
     }
 
-    final userTopics = ref.watch(userDataProvider(dbTitle));
+    final dataList = ref.watch(userDataProvider(dbTitle));
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -50,10 +52,10 @@ class DrawerItemDataScreen extends ConsumerWidget {
         color: Theme.of(context).colorScheme.primary,
         child: ListView.builder(
           padding: EdgeInsets.all(12),
-          itemCount: userTopics.length,
+          itemCount: dataList.length,
           itemBuilder: (ctx, index) {
             return Dismissible(
-              key: ValueKey(userTopics[index]),
+              key: ValueKey(dataList[index]),
               direction: DismissDirection.endToStart,
               background: Container(
                 alignment: Alignment.centerRight,
@@ -71,13 +73,18 @@ class DrawerItemDataScreen extends ConsumerWidget {
               child: Card(
                 margin: EdgeInsets.symmetric(vertical: 8),
                 child: ListTile(
-                  title: Text('${userTopics[index]['title']}'),
+                  title: title != 'Задачі'
+                      ? Text('${dataList[index]['title']}')
+                      : MarkdownBody(
+                          data: '${dataList[index]['title']}',
+                          inlineSyntaxes: [LatexSyntax()],
+                          builders: {'latex': LatexBuilder()},
+                        ),
                   trailing: title != 'Задачі'
                       ? IconButton(
                           icon: Icon(Icons.edit, size: 20),
-                          onPressed: () => openAddOverlay(
-                            item: userTopics[index],
-                          ),
+                          onPressed: () =>
+                              openAddOverlay(item: dataList[index]),
                         )
                       : null,
                 ),
@@ -85,7 +92,7 @@ class DrawerItemDataScreen extends ConsumerWidget {
               onDismissed: (direction) {
                 ref
                     .read(userDataProvider(dbTitle).notifier)
-                    .deleteItem(userTopics[index]['id']!);
+                    .deleteItem(dataList[index]['id']!);
               },
             );
           },

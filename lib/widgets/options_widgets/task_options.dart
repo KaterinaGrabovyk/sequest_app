@@ -24,6 +24,7 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
   var _selectedHobby = '';
   File? _selectedImage;
   bool isSending = false;
+  bool _isAdapation = false;
   void _sendPrompt() async {
     setState(() {
       isSending = true;
@@ -53,12 +54,16 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
     if (_selectedImage != null) {
       finalImageBytes = await _selectedImage!.readAsBytes();
     }
+    if (_groupValue == 1) {
+      _isAdapation = true;
+    }
     await ref
         .read(aiResponseProvider.notifier)
         .generateProblem(
           topic: _selectedTopic,
           hobby: _selectedHobby,
           image: finalImageBytes,
+          isAdapation: _isAdapation,
         );
     final task = ref.read(aiResponseProvider);
     if (!task.startsWith('Помилка') && task != 'loading') {
@@ -67,10 +72,12 @@ class _TaskOptionsState extends ConsumerState<TaskOptions> {
       setState(() {
         _selectedTopic = '';
         _selectedHobby = '';
+        _isAdapation = false;
         isSending = false;
       });
     }
     setState(() {
+      _isAdapation = false;
       isSending = false;
     });
   }
