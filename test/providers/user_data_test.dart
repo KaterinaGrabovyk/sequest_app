@@ -5,8 +5,10 @@ import 'package:skill_up_app/Providers/ai_service.dart';
 
 // Імпортуй правильні шляхи до своїх файлів
 import 'package:skill_up_app/Providers/gemini_provider.dart';
+
 // Створюємо мок для нашого нового сервісу
 class MockAIService extends Mock implements AIService {}
+
 void main() {
   group('UserDataProvider Тести', () {
     const dbTitle = 'test_database';
@@ -21,14 +23,20 @@ void main() {
       expect(provider.state, isEmpty);
     });
 
-    test('addItem коректно додає новий елемент і сортує його на початок', () {
-      provider.addItem('Перша задача');
-      provider.addItem('Друга задача');
+    test(
+      'addItem коректно додає новий елемент і сортує його на початок',
+      () {
+        provider.addItem('Перша задача');
+        provider.addItem('Друга задача');
 
-      final state = provider.state;
-      expect(state.length, 2);
-      expect(state.first['title'], 'Друга задача'); // Остання додана має бути першою
-    });
+        final state = provider.state;
+        expect(state.length, 2);
+        expect(
+          state.first['title'],
+          'Друга задача',
+        ); // Остання додана має бути першою
+      },
+    );
 
     test('editItem успішно змінює заголовок за ID', () {
       provider.addItem('Оригінальний заголовок');
@@ -49,7 +57,7 @@ void main() {
     });
   });
 
-group('AIProvider Тести з Моками', () {
+  group('AIProvider Тести з Моками', () {
     late AIProvider aiProvider;
     late MockAIService mockAIService;
 
@@ -62,63 +70,89 @@ group('AIProvider Тести з Моками', () {
       expect(aiProvider.state, '');
     });
 
-    test('Успішна генерація задачі без зображення (текстовий prompt)', () async {
-      const expectedResponse = 'Геймер Вася має 5 яблук...';
-      
-      when(() => mockAIService.generateContent(
+    test(
+      'Успішна генерація задачі без зображення (текстовий prompt)',
+      () async {
+        const expectedResponse = 'Геймер Вася має 5 яблук...';
+
+        when(
+          () => mockAIService.generateContent(
             textPrompt: any(named: 'textPrompt'),
             image: null,
-          )).thenAnswer((invocation) async {
-        // Отримуємо аргумент, який реально прийшов у метод під час тесту
-        
-        // Виводимо гарний аутпут у консоль
-        print('\n [AI TEST LOG] Виклик generateContent():');
-        print(' Згенерована відповідь моку:\n$expectedResponse\n');
-        
-        return expectedResponse;
-      });
+          ),
+        ).thenAnswer((invocation) async {
+          // Отримуємо аргумент, який реально прийшов у метод під час тесту
 
-      await aiProvider.generateProblem(
-        topic: 'Математика',
-        hobby: 'Ігри',
-      );
+          // Виводимо гарний аутпут у консоль
+          print('\n [AI TEST LOG] Виклик generateContent():');
+          print(
+            ' Згенерована відповідь моку:\n$expectedResponse\n',
+          );
 
-      expect(aiProvider.state, expectedResponse);
-    });
+          return expectedResponse;
+        });
 
-    test('Повернення помилки, якщо сервіс повернув null або порожній рядок', () async {
-      when(() => mockAIService.generateContent(
+        await aiProvider.generateProblem(
+          topic: 'Математика',
+          hobby: 'Ігри',
+          isAdapation: false,
+        );
+
+        expect(aiProvider.state, expectedResponse);
+      },
+    );
+
+    test(
+      'Повернення помилки, якщо сервіс повернув null або порожній рядок',
+      () async {
+        when(
+          () => mockAIService.generateContent(
             textPrompt: any(named: 'textPrompt'),
             image: null,
-          )).thenAnswer((invocation) async {
-        print('\n [AI TEST LOG] Тест порожньої відповіді від моделі.');
-        return '';
-      });
+          ),
+        ).thenAnswer((invocation) async {
+          print(
+            '\n [AI TEST LOG] Тест порожньої відповіді від моделі.',
+          );
+          return '';
+        });
 
-      await aiProvider.generateProblem(
-        topic: 'Математика',
-        hobby: 'Ігри',
-      );
+        await aiProvider.generateProblem(
+          topic: 'Математика',
+          hobby: 'Ігри',
+          isAdapation: false,
+        );
 
-      expect(aiProvider.state, 'Помилка: Модель повернула порожню відповідь');
-    });
+        expect(
+          aiProvider.state,
+          'Помилка: Модель повернула порожню відповідь',
+        );
+      },
+    );
 
     test('Обробка виключення (Exception) під час запиту', () async {
-      when(() => mockAIService.generateContent(
-            textPrompt: any(named: 'textPrompt'),
-            image: any(named: 'image'),
-          )).thenAnswer((invocation) {
-        print('\n🛑 [AI TEST LOG] Симуляція помилки мережі (Exception).');
+      when(
+        () => mockAIService.generateContent(
+          textPrompt: any(named: 'textPrompt'),
+          image: any(named: 'image'),
+        ),
+      ).thenAnswer((invocation) {
+        print(
+          '\n[AI TEST LOG] Симуляція помилки мережі (Exception).',
+        );
         throw Exception('Network error');
       });
 
       await aiProvider.generateProblem(
         topic: 'Математика',
         hobby: 'Ігри',
+        isAdapation: false,
       );
 
-      expect(aiProvider.state, contains('Помилка: Exception: Network error'));
+      expect(
+        aiProvider.state,
+        contains('Помилка: Exception: Network error'),
+      );
     });
   });
-
 }
